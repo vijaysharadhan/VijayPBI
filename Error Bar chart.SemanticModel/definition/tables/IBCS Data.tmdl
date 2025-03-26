@@ -1,0 +1,130 @@
+table 'IBCS Data'
+	lineageTag: 72296fa6-f72a-4853-b3cd-3bb5d8274f9c
+
+	measure DeltaPY = ```
+			IF(ISBLANK([FC]), [AC] - [PY], [FC] - [PY])
+			    
+			```
+		lineageTag: 17ba7a1d-780a-4907-8fe0-cfed2c649d47
+
+	measure FC = ```
+			SUM('IBCS data'[2023 Predictions])
+			    
+			```
+		lineageTag: 1a9e8767-e7b3-4bc9-8eda-5e6f18cbc858
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure PY = ```
+			SUM('IBCS data'[2022])
+			    
+			```
+		formatString: 0
+		lineageTag: 2a3a9e1a-d5aa-47bc-9516-80502ebc35de
+
+	measure AC = ```
+			SUM('IBCS data'[2023])
+			    
+			```
+		formatString: 0
+		lineageTag: c3eb68fb-0bba-4e4c-9438-ceb01148460e
+
+	measure 'Red Max' = ```
+			If([DeltaPY] <0, [Max value])
+			    
+			```
+		lineageTag: 9411827c-e2db-4599-b0e9-c7d7a297c1a9
+
+	measure 'Green Max' = ```
+			If([DeltaPY]> 0, [Max value])
+			    
+			```
+		lineageTag: d89ee756-83c8-4c3b-856f-14ca9a37be0a
+
+	measure 'Delta Color' = ```
+			IF( [DeltaPY] <0,  "#ff0000","#008e94")
+			    
+			```
+		lineageTag: 4803d962-bf1a-4b5f-857f-4d7212a4217f
+
+	measure 'DeltaPY %' = format(DIVIDE ( [DeltaPY], [PY] ), "0.0%" ) & " vs " & sum('IBCS Data'[2022])
+		lineageTag: d38e3af9-5afe-4ea2-af2a-e94e1f7fef12
+
+	measure 'Max value' = ```
+			IF(ISBLANK([FC]), 
+			  if([AC]>[PY], [AC], [PY]),
+			  if([PY]>[FC], [PY], [FC]))
+			    
+			```
+		lineageTag: dd3d4f0e-c522-4c42-bb00-eb5b36da93eb
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Month Number '
+		dataType: int64
+		formatString: 0
+		lineageTag: deac54b6-ddf7-42bf-82bc-43034443f9a4
+		summarizeBy: sum
+		sourceColumn: "Month Number "
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month
+		dataType: string
+		lineageTag: ca17748f-a2a2-4ca7-8b92-e67a991d822a
+		summarizeBy: none
+		sourceColumn: Month
+		sortByColumn: 'Month Number '
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column 2022
+		dataType: int64
+		formatString: 0
+		lineageTag: 429649ec-42b5-4e0c-be37-b54b107735f9
+		summarizeBy: sum
+		sourceColumn: 2022
+
+		annotation SummarizationSetBy = Automatic
+
+	column 2023
+		dataType: int64
+		formatString: 0
+		lineageTag: ae8d9b9c-ea44-41fd-9a1b-eac72c2cff2e
+		summarizeBy: sum
+		sourceColumn: 2023
+
+		annotation SummarizationSetBy = Automatic
+
+	column '2023 Predictions'
+		dataType: double
+		lineageTag: 539efaed-185d-48ab-8ed6-8e31611fc33c
+		summarizeBy: sum
+		sourceColumn: 2023 Predictions
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition 'IBCS Data' = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("TZDLasQwDEV/JWQdguS3loXSRaHTQpchi5nUtIFpMniSQv++lu0Ub6xrdKQraRjaduyG9mVdtq/mtH9ffGi6Jn+7RoAQOcimS+9b8B/ztM3rck+FGNPP52U/h18GndA9QFQWFWSVMO7y5C+hcBqgcGhQVZxk83OY2FwaFAVSVouKUlE83MJ8ZUuyLqdIyorRqRObOWNKsZGqRgzPvi8+hmhQxnVC1IxNzJX7KHUYGNI143ic/XO/b+lWhxuBwoqiKN79bfPlxiQFlfWAqF4PWb1O25pBNOIYm4TVNcjXP60/R0sFWByZNQQ9Qgb5/o9+OkC0zul/0ikne6nbcfwD", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Column1 = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Column1", type text}}),
+				    #"Split Column by Delimiter" = Table.SplitColumn(#"Changed Type", "Column1", Splitter.SplitTextByDelimiter(",", QuoteStyle.Csv), {"Column1.1", "Column1.2", "Column1.3", "Column1.4", "Column1.5"}),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Split Column by Delimiter",{{"Column1.1", type text}, {"Column1.2", type text}, {"Column1.3", Int64.Type}, {"Column1.4", Int64.Type}, {"Column1.5", type text}}),
+				    #"Promoted Headers" = Table.PromoteHeaders(#"Changed Type1", [PromoteAllScalars=true]),
+				    #"Changed Type2" = Table.TransformColumnTypes(#"Promoted Headers",{{"", type text}, {"Column2", type text}, {"Column3", Int64.Type}, {"Column4", Int64.Type}, {"Column5", type text}}),
+				    #"Promoted Headers1" = Table.PromoteHeaders(#"Changed Type2", [PromoteAllScalars=true]),
+				    #"Changed Type3" = Table.TransformColumnTypes(#"Promoted Headers1",{{"Month Number ", Int64.Type}, {" Month ", type text}, {"2022", Int64.Type}, {"2023", Int64.Type}, {"2023 Predictions", type number}}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Changed Type3",{{" Month ", "Month"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

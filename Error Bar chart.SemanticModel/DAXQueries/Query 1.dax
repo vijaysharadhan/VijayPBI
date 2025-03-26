@@ -1,0 +1,12 @@
+DEFINE
+    MEASURE 'IBCS data'[DeltaPY] = IF(ISBLANK([FC]), [AC] - [PY], [FC] - [PY])
+    MEASURE 'IBCS data'[Max value] = IF(ISBLANK([FC]), 
+  if([AC]>[PY], [AC], [PY]),
+  if([PY]>[FC], [PY], [FC]))
+    MEASURE 'IBCS data'[FC] = SUM('IBCS data'[2023 Predictions])
+    MEASURE 'IBCS data'[PY] = SUM('IBCS data'[2022])
+    MEASURE 'IBCS data'[AC] = SUM('IBCS data'[2023])
+    MEASURE 'IBCS data'[Red Max] = If([DeltaPY] <0, [Max value])
+    MEASURE 'IBCS data'[Green Max] = If([DeltaPY]> 0, [Max value])
+    MEASURE 'IBCS data'[Delta Color] = IF( [DeltaPY] <0,  "#ff0000","#008e96")
+    MEASURE 'IBCS data'[DeltaPY %] = DIVIDE ( [DeltaPY], [PY] )

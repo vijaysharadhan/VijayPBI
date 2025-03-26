@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "Error Bar chart"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "226b834b-0d57-4545-a126-3f225da75930"
+  }
+}
